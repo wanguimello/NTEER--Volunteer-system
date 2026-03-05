@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supervisor Dashboard - Volunteer with NTeer</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <!-- Leaflet CSS for Map -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background-color: var(--color-black);
+            color: var(--color-white);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar .logo {
+            color: var(--color-white);
+            margin-bottom: 3rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            color: var(--color-gray-200);
+            transition: var(--transition);
+        }
+
+        .nav-item a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--color-white);
+        }
+
+        .nav-item i {
+            font-size: 1.25rem;
+        }
+
+        .user-profile {
+            margin-top: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: var(--color-gray-500);
+            text-transform: capitalize;
+        }
+
+        .main-content {
+            background-color: var(--color-gray-100);
+            padding: 2rem 3rem;
+            overflow-y: auto;
+        }
+
+        .section-panel {
+            background: var(--color-white);
+            border-radius: 16px;
+            padding: 2.5rem;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--color-gray-200);
+            max-width: 900px;
+        }
+
+        .panel-header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--color-gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-header h2 {
+            font-size: 1.8rem;
+        }
+
+        .panel-header p {
+            color: var(--color-gray-500);
+            margin-top: 0.5rem;
+        }
+
+        .status-badge {
+            padding: 0.4rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .status-badge.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-badge.approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .form-input,
+        .form-textarea {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 1px solid var(--color-gray-200);
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 1rem;
+            background: var(--color-gray-100);
+            transition: var(--transition);
+        }
+
+        .form-input:focus,
+        .form-textarea:focus {
+            background: var(--color-white);
+            outline: none;
+            border-color: var(--color-black);
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        #map-picker {
+            height: 300px;
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid var(--color-gray-200);
+            margin-top: 0.5rem;
+            z-index: 10;
+        }
+
+        .map-hint {
+            font-size: 0.85rem;
+            color: var(--color-gray-500);
+            margin-top: 0.5rem;
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="ph ph-hand-heart"></i>
+                <span>NTeer</span>
+            </div>
+
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#" class="active">
+                        <i class="ph ph-building"></i>
+                        <span>My Site</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="user-profile">
+                <div class="user-info">
+                    <span class="user-name" id="display-name">Supervisor Name</span>
+                    <span class="user-role">Site Supervisor</span>
+                </div>
+                <a href="#" id="logout-btn" title="Log Out" style="color: var(--color-gray-200);">
+                    <i class="ph ph-sign-out"></i>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="section-panel">
+                <div class="panel-header">
+                    <div>
+                        <h2>Manage Site</h2>
+                        <p>Configure your single volunteer location. All sites are verified by Admins.</p>
+                    </div>
+                    <div id="site-status" style="display: none;">
+                        <span class="status-badge" id="status-badge-text">Status</span>
+                    </div>
+                </div>
+
+                <form id="site-form">
+                    <input type="hidden" id="site-id">
+                    <input type="hidden" id="site-lat">
+                    <input type="hidden" id="site-lng">
+
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label class="form-label" for="site-name">Site Name</label>
+                            <input type="text" id="site-name" class="form-input" required
+                                placeholder="E.g. Downtown Community Cleanup">
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label class="form-label" for="site-desc">Description & Instructions</label>
+                            <textarea id="site-desc" class="form-textarea" required
+                                placeholder="Describe the volunteer duties..."></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="site-max">Site Volunteer Limit</label>
+                            <input type="number" id="site-max" class="form-input" required min="1"
+                                placeholder="Maximum needed volunteers">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label" for="site-current">Current Volunteer Count</label>
+                            <input type="number" id="site-current" class="form-input" min="0" value="0">
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label class="form-label">Location</label>
+                            <div id="map-picker"></div>
+                            <span class="map-hint"><i class="ph ph-info"></i> Click the map to drop a pin for your
+                                site's location.</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 2rem; display: flex; justify-content: flex-end;">
+                        <button type="submit" class="btn-solid btn-lg">Save Site Configuration</button>
+                    </div>
+                </form>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <!-- Leaflet JS -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/store.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/supervisor.js"></script>
+</body>
+
+</html>

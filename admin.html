@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Volunteer with NTeer</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background-color: var(--color-black);
+            color: var(--color-white);
+            padding: 2rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar .logo {
+            color: var(--color-white);
+            margin-bottom: 3rem;
+        }
+
+        .nav-menu {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            flex: 1;
+        }
+
+        .nav-item a {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            color: var(--color-gray-200);
+            transition: var(--transition);
+        }
+
+        .nav-item a:hover,
+        .nav-item a.active {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: var(--color-white);
+        }
+
+        .user-profile {
+            margin-top: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .user-role {
+            font-size: 0.8rem;
+            color: var(--color-gray-500);
+        }
+
+        .main-content {
+            background-color: var(--color-gray-100);
+            padding: 2rem 3rem;
+            overflow-y: auto;
+        }
+
+        .page-header {
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: var(--color-gray-500);
+            font-size: 1rem;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .stat-card {
+            background-color: var(--color-white);
+            padding: 1.5rem;
+            border-radius: 12px;
+            border: 1px solid var(--color-gray-200);
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .stat-icon {
+            font-size: 2.5rem;
+            color: var(--color-black);
+            background-color: var(--color-gray-100);
+            padding: 1rem;
+            border-radius: 12px;
+        }
+
+        .stat-info h3 {
+            font-size: 1.8rem;
+            line-height: 1;
+            margin-bottom: 0.2rem;
+        }
+
+        .stat-info p {
+            color: var(--color-gray-500);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* Tables Container */
+        .data-section {
+            background-color: var(--color-white);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--color-gray-200);
+            margin-bottom: 2rem;
+        }
+
+        .data-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--color-gray-100);
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid var(--color-gray-100);
+        }
+
+        th {
+            font-weight: 600;
+            color: var(--color-gray-500);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        tr:hover td {
+            background-color: var(--color-gray-100);
+        }
+
+        .role-badge {
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            background-color: var(--color-gray-200);
+            display: inline-block;
+        }
+
+        .role-badge.admin {
+            background-color: var(--color-black);
+            color: var(--color-white);
+        }
+
+        .role-badge.supervisor {
+            background-color: var(--color-blue-light);
+            color: var(--color-blue);
+        }
+
+        .role-badge.volunteer {
+            background-color: var(--color-gray-200);
+            color: var(--color-gray-800);
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: var(--transition);
+        }
+
+        .btn-delete {
+            color: var(--color-red);
+        }
+
+        .btn-delete:hover {
+            background-color: var(--color-red-light);
+        }
+
+        /* Review Card admin override */
+        .review-card {
+            background-color: var(--color-gray-100);
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <i class="ph ph-hand-heart"></i>
+                <span>NTeer</span>
+            </div>
+
+            <ul class="nav-menu">
+                <li class="nav-item">
+                    <a href="#overview" class="active" data-view="overview">
+                        <i class="ph ph-squares-four"></i>
+                        <span>Overview</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#users" data-view="users">
+                        <i class="ph ph-users"></i>
+                        <span>Manage Users</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#sites" data-view="sites">
+                        <i class="ph ph-buildings"></i>
+                        <span>Manage Sites</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="#reviews" data-view="reviews">
+                        <i class="ph ph-star"></i>
+                        <span>Moderation</span>
+                    </a>
+                </li>
+            </ul>
+
+            <div class="user-profile">
+                <div class="user-info">
+                    <span class="user-name" id="display-name">Admin</span>
+                    <span class="user-role">Administrator</span>
+                </div>
+                <button id="logout-btn"
+                    style="background:none; border:none; cursor:pointer; color: var(--color-gray-200); font-size: 1.25rem;">
+                    <i class="ph ph-sign-out"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+
+            <!-- Overview View -->
+            <div id="view-overview" class="view-section">
+                <div class="page-header">
+                    <h1>System Overview</h1>
+                    <p>Platform metrics and quick stats.</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="ph ph-users"></i></div>
+                        <div class="stat-info">
+                            <h3 id="stat-users">0</h3>
+                            <p>Total Users</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="ph ph-buildings"></i></div>
+                        <div class="stat-info">
+                            <h3 id="stat-sites">0</h3>
+                            <p>Active Sites</p>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon"><i class="ph ph-star"></i></div>
+                        <div class="stat-info">
+                            <h3 id="stat-reviews">0</h3>
+                            <p>Reviews Posted</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Users View -->
+            <div id="view-users" class="view-section" style="display: none;">
+                <div class="page-header">
+                    <h1>Manage Users</h1>
+                    <p>View and remove platform users.</p>
+                </div>
+
+                <div class="data-section">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Full Name</th>
+                                    <th>Username</th>
+                                    <th>Role</th>
+                                    <th>Joined</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="users-table-body">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sites View -->
+            <div id="view-sites" class="view-section" style="display: none;">
+                <div class="page-header">
+                    <h1>Manage Sites</h1>
+                    <p>Oversee all registered community service sites.</p>
+                </div>
+
+                <div class="data-section">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Site Name</th>
+                                    <th>Status</th>
+                                    <th>Supervisor ID</th>
+                                    <th>Enrolled / Capacity</th>
+                                    <th>Created</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="sites-table-body">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reviews Moderation View -->
+            <div id="view-reviews" class="view-section" style="display: none;">
+                <div class="page-header">
+                    <h1>Review Moderation</h1>
+                    <p>Monitor and remove inappropriate reviews.</p>
+                </div>
+
+                <div class="data-section" style="background: transparent; border: none; padding: 0;">
+                    <div id="reviews-container">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/store.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+
+</html>
